@@ -1,0 +1,22 @@
+FROM centos:7.9.2009
+
+# basic tools
+RUN yum install -y less && yum install -y vim && yum install -y net-tools && yum install -y telnet && yum install -y mysql && yum install -y epel-release && yum install -y redis && yum install -y unzip && yum install -y wget
+
+# JDK arthas
+RUN yum install -y java-1.8.0-openjdk-devel.x86_64 && mkdir -p /tools/arthas && cd /tools/arthas && wget https://maven.aliyun.com/repository/public/com/taobao/arthas/arthas-packaging/3.1.1/arthas-packaging-3.1.1-bin.zip && unzip arthas-packaging-3.1.1-bin.zip
+
+# UniApi Service
+RUN mkdir -p /opt/leagsoft/UniApi && cd /opt/leagsoft/UniApi \
+	&& wget "https://clouduem-uni-binary.oss-cn-hangzhou.aliyuncs.com/UniApi/start.sh?Expires=1623344064&OSSAccessKeyId=TMP.3KjWHx6NCoYb2rCwHNAPs2aEjNAc3SFDAjsHk8448DCqm4jeMGZXZ4JKXsr2nrivePkC3U6qVqp6G1tgoTGRkNFdBQR5V9&Signature=mVZsxpu1lmodLRkr%2Fhvou8lHyG4%3D" -O start.sh \
+	&& wget "https://clouduem-uni-binary.oss-cn-hangzhou.aliyuncs.com/UniApi/uniapi.jar?Expires=1623344101&OSSAccessKeyId=TMP.3KjWHx6NCoYb2rCwHNAPs2aEjNAc3SFDAjsHk8448DCqm4jeMGZXZ4JKXsr2nrivePkC3U6qVqp6G1tgoTGRkNFdBQR5V9&Signature=J%2F6ZO5xE7N0X7tAIBzQfUx1UR7A%3D" -O uniapi.jar \
+	&& mkdir -p /opt/leagsoft/UniApi/lib \
+	&& wget "https://clouduem-uni-binary.oss-cn-hangzhou.aliyuncs.com/UniApi/lib/makedynpass?Expires=1623344119&OSSAccessKeyId=TMP.3KjWHx6NCoYb2rCwHNAPs2aEjNAc3SFDAjsHk8448DCqm4jeMGZXZ4JKXsr2nrivePkC3U6qVqp6G1tgoTGRkNFdBQR5V9&Signature=kB7pcyPi0Xtxezs7KX0zjVuHD3o%3D" -O makedynpass \
+	&& mv ./makedynpass /opt/leagsoft/UniApi/lib \
+	&& chmod 755 /opt/leagsoft/UniApi/lib/makedynpass && chmod 755 ./start.sh
+
+EXPOSE 80
+
+WORKDIR /opt/leagsoft/UniApi
+
+ENTRYPOINT /opt/leagsoft/UniApi/start.sh start
