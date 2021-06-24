@@ -8,7 +8,7 @@ ADD ./src src/
 # package jar
 RUN mvn clean package
 # Second stage: minimal runtime environment
-From openjdk:8-jre-alpine
+From openjdk:8
 # copy jar from the first stage
 COPY --from=builder target/my-app-1.0-SNAPSHOT.jar my-app-1.0-SNAPSHOT.jar
 
