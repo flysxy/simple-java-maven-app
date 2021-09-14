@@ -1,17 +1,19 @@
-# First stage: complete build environment
-FROM maven:3.5.4-jdk-8-alpine AS builder
+FROM registry.cn-hangzhou.aliyuncs.com/acs/maven:3-jdk-8 AS build
 
-# add pom.xml and source code
-ADD ./pom.xml pom.xml
-ADD ./src src/
+COPY pom.xml /usr/src/app/pom.xml
+WORKDIR /usr/src/app
+RUN mvn dependency:go-offline
 
-# package jar
-RUN mvn clean package
-# Second stage: minimal runtime environment
-From openjdk:8-jre-alpine
-# copy jar from the first stage
-COPY --from=builder target/my-app-1.0-SNAPSHOT.jar my-app-1.0-SNAPSHOT.jar
+COPY src /usr/src/app/src
+# use -o to force mvn work offline
+RUN mvn -f /usr/src/app/pom.xml -o clean package -DskipTests
 
-EXPOSE 8080
-
-CMD ["java", "-jar", "my-app-1.0-SNAPSHOT.jar"]
+FROM openjdk:8-jre
+LABEL PROJECT=TN
+ENV JAR my-app-1.0-SNAPSHOT.jar
+ENV ServerPort 8080
+EXPOSE $ServerPort
+# COPY target/$JAR /app/
+COPY --from=build /usr/src/app/target//$JAR /app/
+WORKDIR /app
+CMD java -jar /app/$JAR
